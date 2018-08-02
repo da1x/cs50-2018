@@ -1,2 +1,4 @@
 # cs50-2018
-CS50
+Personal CS50 course file
+
+https://courses.edx.org/
