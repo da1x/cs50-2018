@@ -5,25 +5,31 @@
 
 int main(int argc, string argv[1])
 {
-    char plainText[100];
 
     if (argc == 2)
     {
-        do
+        for (int i = 0, n = strlen(argv[1]); i < n; i++)
         {
-            //prompt the user for a paintext
-            printf("plaintext: ");
-            scanf("%s", plainText);
-            printf("%s\n", argv[1]);
-        } while (isalpha(plainText));
+            if (isalpha(argv[1][i]) == false)
+            {
+                printf("Non-alphabetical characters are not allow\n");
+                return 1;
+            }
+        }
     }
     else
     {
         //Exit the program if the user doesnt give the right values that we asked for
         printf("Usage: ./vigenere k\n");
-        return 1;
+        return 2;
     }
 
+    //Get user plain text
+    int plainText = get_int("plaintext: ");
+    printf("%i", plainText);
+
+    //string key number
+
     //encrypt with value that was given
-    printf("ciphertext: ");
+    printf("ciphertext: \n");
 }
