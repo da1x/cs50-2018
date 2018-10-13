@@ -7,6 +7,8 @@
 
 #include "dictionary.h"
 
+typedef struct node *nodeClass;
+
 //Create node
 typedef struct node
 {
@@ -18,8 +20,27 @@ node;
 //The root node
 node *root;
 
+nodeClass createNode(void)
+{
+    nodeClass node = malloc(sizeof(struct node));
+    if (node == NULL)
+    {
+        return NULL;
+    }
+
+    node -> is_word = false;
+
+    for (int i = 0; i < 27; i++)
+    {
+        node -> children[i] = NULL;
+    }
+
+    return node;
+}
+
+
 //Declare bool function for later use
-bool FreeNode(node* ptr);
+void FreeNode(node* ptr);
 
 //Total number of nodes
 int totalNodes;
@@ -37,7 +58,7 @@ bool check(const char *word)
     node* cursor = root;
 
     //Find the index for the charactar by using ASCII value
-    int id;
+    int id = 0;
 
     for(int i = 0; word[i] != '\0'; i++)
     {
@@ -51,19 +72,31 @@ bool check(const char *word)
         }
 
         //Check if the children its NULL or not
-        if(cursor->children[id] == NULL)
+        if(cursor->children[id] != NULL)
+        {
+            //if node exit then go deeper into the trie
+            cursor = cursor->children[id];
+        }
+        else
         {
             //if NULL then node is not created, this also means dictionary doesnt have the word
             //Meaning its misspelled.
             return false;
         }
 
-        //if node exit then go deeper into the trie
-        cursor = cursor->children[id];
+
     }
 
     //Once we hit the last would we would need to check and return the bool of is_word
-    return cursor->is_word; //if true then word exist, else is misspelled/doesnt exist.
+    if (cursor->is_word == true)
+    {
+        return true; //if true then word exist, else is misspelled/doesnt exist.
+    }
+    else
+    {
+        return false;
+    }
+
 
 }
 
@@ -71,7 +104,7 @@ bool check(const char *word)
 bool load(const char *dictionary)
 {
     // Malloc memory for root
-    root = malloc(sizeof(node));
+    root = createNode();
 
     //Keep track of number of nodes
     totalNodes = 0;
@@ -106,7 +139,7 @@ bool load(const char *dictionary)
         else
         {
             //Find the index for the charactar by using ASCII value
-            int id;
+            int id = 0;
 
             if(c == '\'')
             {
@@ -121,7 +154,7 @@ bool load(const char *dictionary)
             if (cursor->children[id] == NULL)
             {
                 //Make a new node and malloc the memory
-                cursor->children[id] = malloc(sizeof(node));
+                cursor->children[id] = createNode();
             }
 
             //if exist then we will keep go deeper into the trie
@@ -142,7 +175,7 @@ unsigned int size(void)
     return totalNodes;
 }
 
-bool FreeNode(node* ptr)
+void FreeNode(node* ptr)
 {
     //Check if children node is free, if not then free it
     for (int i = 0; i < 27; i++)
@@ -156,7 +189,7 @@ bool FreeNode(node* ptr)
     //Free parent node once children are all free-ed
     free(ptr);
 
-    return true;
+    return;
 }
 
 // Unloads dictionary from memory, returning true if successful else false
@@ -166,6 +199,7 @@ bool unload(void)
     // Unload from botton to up
     // Travel to lowest possible node, free all pointers in children
     // Freeing all element until you hit root node
-
-    return FreeNode(root);
+    node* currentnode = root;
+    FreeNode(currentnode);
+    return true;
 }
