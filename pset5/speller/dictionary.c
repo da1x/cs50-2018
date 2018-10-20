@@ -14,8 +14,7 @@ typedef struct node
 {
     bool is_word;
     struct node *children[27];
-}
-node;
+} node;
 
 //The root node
 node *root;
@@ -28,19 +27,18 @@ nodeClass createNode(void)
         return NULL;
     }
 
-    node -> is_word = false;
+    node->is_word = false;
 
     for (int i = 0; i < 27; i++)
     {
-        node -> children[i] = NULL;
+        node->children[i] = NULL;
     }
 
     return node;
 }
 
-
 //Declare bool function for later use
-void FreeNode(node* ptr);
+void FreeNode(node *ptr);
 
 //Total number of nodes
 int totalNodes;
@@ -55,14 +53,14 @@ bool check(const char *word)
     //once it is the end of the word we need to check if the bool is_word is true or not
 
     //Make another node as the cursor with same location as root
-    node* cursor = root;
+    node *cursor = root;
 
     //Find the index for the charactar by using ASCII value
     int id = 0;
 
-    for(int i = 0; word[i] != '\0'; i++)
+    for (int i = 0; word[i] != '\0'; i++)
     {
-        if(word[i] == '\'')
+        if (word[i] == '\'')
         {
             id = 26;
         }
@@ -72,7 +70,7 @@ bool check(const char *word)
         }
 
         //Check if the children its NULL or not
-        if(cursor->children[id] != NULL)
+        if (cursor->children[id] != NULL)
         {
             //if node exit then go deeper into the trie
             cursor = cursor->children[id];
@@ -83,8 +81,6 @@ bool check(const char *word)
             //Meaning its misspelled.
             return false;
         }
-
-
     }
 
     //Once we hit the last would we would need to check and return the bool of is_word
@@ -96,8 +92,6 @@ bool check(const char *word)
     {
         return false;
     }
-
-
 }
 
 // Loads dictionary into memory, returning true if successful else false
@@ -110,7 +104,7 @@ bool load(const char *dictionary)
     totalNodes = 0;
 
     //Read dictionary and check if the dictionary is null or not
-    FILE* fp = fopen(dictionary, "r");
+    FILE *fp = fopen(dictionary, "r");
     if (fp == NULL)
     {
         //Unload dictionary if it cant be open
@@ -120,7 +114,7 @@ bool load(const char *dictionary)
     }
 
     //Make another node as the cursor with same location as root
-    node* cursor = root;
+    node *cursor = root;
 
     //Read each character in the dictionary
     for (int c = fgetc(fp); c != EOF; c = fgetc(fp)) //Check if the c is EOF (-1)
@@ -141,7 +135,7 @@ bool load(const char *dictionary)
             //Find the index for the charactar by using ASCII value
             int id = 0;
 
-            if(c == '\'')
+            if (c == '\'')
             {
                 id = 26;
             }
@@ -162,7 +156,6 @@ bool load(const char *dictionary)
         }
     }
 
-
     //Close the dictionary
     fclose(fp);
 
@@ -175,12 +168,12 @@ unsigned int size(void)
     return totalNodes;
 }
 
-void FreeNode(node* ptr)
+void FreeNode(node *ptr)
 {
     //Check if children node is free, if not then free it
     for (int i = 0; i < 27; i++)
     {
-        if(ptr->children[i] != NULL)
+        if (ptr->children[i] != NULL)
         {
             FreeNode(ptr->children[i]);
         }
@@ -199,7 +192,7 @@ bool unload(void)
     // Unload from botton to up
     // Travel to lowest possible node, free all pointers in children
     // Freeing all element until you hit root node
-    node* currentnode = root;
+    node *currentnode = root;
     FreeNode(currentnode);
     return true;
 }
