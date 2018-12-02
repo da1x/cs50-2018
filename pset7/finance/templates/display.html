@@ -8,7 +8,6 @@
     <p>
         Name: {{ symbolValues.name }}<br>
         Symbol: {{ symbolValues.symbol }}<br>
-        Price: {{ symbolValues.price }}<br>
-        {{ chart }}
+        Price({{ selected_curr }}): ${% set price = symbolValues.price | float %}{{ "%.2f"|format(price * newCurr)}}<br>
     </p>
 {% endblock %}
