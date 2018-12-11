@@ -37,7 +37,7 @@ def articles():
         if geo is None:
             return "Error: Articles Not Found!"
         else:
-            return jsonify(geo[0],geo[1],geo[2],geo[3],geo[4],geo[5],geo[6],geo[7],geo[8],geo[9])
+            return jsonify(geo[0], geo[1], geo[2], geo[3], geo[4], geo[5], geo[6], geo[7], geo[8], geo[9])
     else:
         return "Error: Method Error"
 

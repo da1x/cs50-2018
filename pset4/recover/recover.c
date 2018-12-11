@@ -38,12 +38,12 @@ int main(int argc, char *argv[])
 
     //read file with fread(data, size, number, inputr)
     //Loop through the rawData - 512 at a time and check if there is a jpg
-    while(fread(buffer, BUFFER_SIZE, 1, rawData) == 1)
+    while (fread(buffer, BUFFER_SIZE, 1, rawData) == 1)
     {
         //Check if it is a JPG
         if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] && (buffer[3] & 0xf0) == 0xe0)
         {
-            if(jpgOpened == 1)
+            if (jpgOpened == 1)
             {
                 //close image if we found the first img
                 fclose(img);
@@ -62,9 +62,9 @@ int main(int argc, char *argv[])
         }
 
         //write out jpg
-        if(jpgOpened == 1)
+        if (jpgOpened == 1)
         {
-            fwrite(&buffer, BUFFER_SIZE, 1,img);
+            fwrite(&buffer, BUFFER_SIZE, 1, img);
         }
 
     }

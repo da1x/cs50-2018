@@ -24,7 +24,8 @@ int frequency(string note)
     double frequency = 0.0;
 
     //Get the octave which is the last char
-    int octave = note[strlen(note) - 1] - '0'; //get last char by lenght - 1- Using ascii values we can find the difference between each octave by substracting ascii value of 0
+    int octave = note[strlen(note) - 1] -
+                 '0'; //get last char by lenght - 1- Using ascii values we can find the difference between each octave by substracting ascii value of 0
 
     //Check the note letter and calculate the frequency
     //TODO: Maybe this can be change into a switch statement?

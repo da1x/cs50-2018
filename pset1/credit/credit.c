@@ -10,7 +10,8 @@ int main(void)
     do
     {
         CardNum = get_long_long("Number: ");
-    } while (CardNum <= 0);
+    }
+    while (CardNum <= 0);
 
     //Count how many digits
     TempNum = CardNum;

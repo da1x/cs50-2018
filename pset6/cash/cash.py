@@ -1,5 +1,6 @@
 from cs50 import get_float
 
+
 def main():
     # Get the user change
     change = 0
@@ -12,7 +13,6 @@ def main():
         if change > 0:
             break
 
-
     while change > 0:
 
         # Wokr out the change
@@ -21,8 +21,8 @@ def main():
             change -= 25
         elif change >= 10:
             coin += 1
-            change -=10
-        elif change >=5:
+            change -= 10
+        elif change >= 5:
             coin += 1
             change -= 5
         elif change >= 1:
@@ -33,7 +33,7 @@ def main():
         if change <= 0:
             break
 
-    print(coin);
+    print(coin)
 
 
 if __name__ == '__main__':

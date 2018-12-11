@@ -2,6 +2,7 @@ import sys
 from crypt import crypt
 from string import ascii_letters
 
+
 def main():
 
     letter = ''.join(str(e) for e in ascii_letters)
@@ -61,9 +62,9 @@ def main():
                         print(keyStr)
                         sys.exit()
 
-
     print("No password match")
     return 0
+
 
 if __name__ == '__main__':
     main()

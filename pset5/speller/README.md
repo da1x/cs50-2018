@@ -2,7 +2,7 @@
 
 ## What is pneumonoultramicroscopicsilicovolcanoconiosis?
 
-TODO
+It is the longestword in the English language published in a dictionary.
 
 ## According to its man page, what does `getrusage` do?
 

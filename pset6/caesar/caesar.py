@@ -18,8 +18,7 @@ def main():
     else:
         sys.exit(1)
 
-
-    print("ciphertext: ", end = "")
+    print("ciphertext: ", end="")
     for i in range(len(plainText)):
 
         letter = plainText[i]
@@ -37,6 +36,7 @@ def main():
 
         if len(cipherletter) == len(plainText):
             print(cipherletter)
+
 
 if __name__ == '__main__':
     main()

@@ -20,7 +20,7 @@ $(document).ready(function() {
             featureType: "all",
             elementType: "labels",
             stylers: [
-                {visibility: "off"}
+                { visibility: "off" }
             ]
         },
 
@@ -29,7 +29,7 @@ $(document).ready(function() {
             featureType: "road",
             elementType: "geometry",
             stylers: [
-                {visibility: "off"}
+                { visibility: "off" }
             ]
         }
 
@@ -38,7 +38,7 @@ $(document).ready(function() {
     // Options for map
     // https://developers.google.com/maps/documentation/javascript/reference#MapOptions
     let options = {
-        center: {lat: 42.3770, lng: -71.1256}, // Cambridge
+        center: { lat: 42.3770, lng: -71.1256 }, // Cambridge
         disableDefaultUI: true,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         maxZoom: 14,
@@ -61,15 +61,14 @@ $(document).ready(function() {
 
 
 // Add marker for place to map
-function addMarker(place)
-{
+function addMarker(place) {
     var image = {
         url: "https://maps.google.com/mapfiles/kml/pal2/icon7.png",
-        labelOrigin: new google.maps.Point(15,40)
+        labelOrigin: new google.maps.Point(15, 40)
     }
 
     var marker = new google.maps.Marker({
-        position: {lat: place.latitude, lng: place.longitude},
+        position: { lat: place.latitude, lng: place.longitude },
         map: map,
         title: place.place_name + ", " + place.admin_name1,
         label: place.place_name + ", " + place.admin_name1,
@@ -78,18 +77,17 @@ function addMarker(place)
 
 
     // Get articles from server
-    $.getJSON(Flask.url_for("articles"), {geo: place.postal_code}, function(articles){
-        if(!$.isEmptyObject(articles))
-        {
+    $.getJSON(Flask.url_for("articles"), { geo: place.postal_code }, function(articles) {
+        if (!$.isEmptyObject(articles)) {
             var articlesContents = "<ul>";
-            for(let i = 0; i < articles.length; i++)
-            {
-                articlesContents += '<li><a target="_new" href="' + articles[i].link + '">' + articles[i].title + "</a></li>";
+            for (let i = 0; i < articles.length; i++) {
+                articlesContents += '<li><a target="_new" href="' +
+                    articles[i].link + '">' + articles[i].title + "</a></li>";
             }
             articlesContents += "</ul>";
         }
-            // listen for onclick
-            google.maps.event.addListener(marker,'click', function() {
+        // listen for onclick
+        google.maps.event.addListener(marker, 'click', function() {
             showInfo(marker, articlesContents);
         })
     });
@@ -100,15 +98,13 @@ function addMarker(place)
 
 
 // Configure application
-function configure()
-{
+function configure() {
     // Update UI after map has been dragged
     google.maps.event.addListener(map, "dragend", function() {
 
         // If info window isn't open
         // http://stackoverflow.com/a/12410385
-        if (!info.getMap || !info.getMap())
-        {
+        if (!info.getMap || !info.getMap()) {
             update();
         }
     });
@@ -122,8 +118,7 @@ function configure()
     $("#q").typeahead({
         highlight: false,
         minLength: 1
-    },
-    {
+    }, {
         display: function(suggestion) { return null; },
         limit: 10,
         source: search,
@@ -140,7 +135,7 @@ function configure()
     $("#q").on("typeahead:selected", function(eventObject, suggestion, name) {
 
         // Set map's center
-        map.setCenter({lat: parseFloat(suggestion.latitude), lng: parseFloat(suggestion.longitude)});
+        map.setCenter({ lat: parseFloat(suggestion.latitude), lng: parseFloat(suggestion.longitude) });
 
         // Update UI
         update();
@@ -168,13 +163,12 @@ function configure()
 
 
 // Remove markers from map
-function removeMarkers()
-{
+function removeMarkers() {
 
     markers.forEach(function(item) {
         item.setMap(null);
         google.maps.event.clearInstanceListeners(item);
-        });
+    });
 
     markers = [];
 
@@ -182,8 +176,7 @@ function removeMarkers()
 
 
 // Search database for typeahead's suggestions
-function search(query, syncResults, asyncResults)
-{
+function search(query, syncResults, asyncResults) {
     // Get places matching query (asynchronously)
     let parameters = {
         q: query
@@ -197,17 +190,13 @@ function search(query, syncResults, asyncResults)
 
 
 // Show info window at marker with content
-function showInfo(marker, content)
-{
+function showInfo(marker, content) {
     // Start div
     let div = "<div id='info'>";
-    if (typeof(content) == "undefined")
-    {
+    if (typeof(content) == "undefined") {
         // http://www.ajaxload.info/
         div += "<img alt='loading' src='/static/ajax-loader.gif'/>";
-    }
-    else
-    {
+    } else {
         div += content;
     }
 
@@ -223,8 +212,7 @@ function showInfo(marker, content)
 
 
 // Update UI's markers
-function update()
-{
+function update() {
     // Get map's bounds
     let bounds = map.getBounds();
     let ne = bounds.getNorthEast();
@@ -238,13 +226,12 @@ function update()
     };
     $.getJSON("/update", parameters, function(data, textStatus, jqXHR) {
 
-       // Remove old markers from map
-       removeMarkers();
+        // Remove old markers from map
+        removeMarkers();
 
-       // Add new markers to map
-       for (let i = 0; i < data.length; i++)
-       {
-           addMarker(data[i]);
-       }
+        // Add new markers to map
+        for (let i = 0; i < data.length; i++) {
+            addMarker(data[i]);
+        }
     });
 };

@@ -17,7 +17,8 @@ int main(void)
     do
     {
         change = get_float("Change: ");
-    } while (change < 0);
+    }
+    while (change < 0);
 
     //Change to input to all cents
     change = roundf(change * 100);

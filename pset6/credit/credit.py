@@ -1,6 +1,7 @@
 from cs50 import get_int
 import sys
 
+
 def main():
     sumForEven = 0
     sumForOdd = 0
@@ -22,7 +23,7 @@ def main():
             sumForEven += num1
         else:
             beforeTotalSum = num1 * 2
-            sumForOdd += (beforeTotalSum % 10) + (beforeTotalSum // 10);
+            sumForOdd += (beforeTotalSum % 10) + (beforeTotalSum // 10)
 
         CardNum //= 10
         tempCounter -= 1
@@ -38,6 +39,7 @@ def main():
         print("VISA")
     else:
         print("INVALID")
+
 
 if __name__ == '__main__':
     main()

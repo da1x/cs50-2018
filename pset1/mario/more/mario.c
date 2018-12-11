@@ -42,5 +42,6 @@ int main(void)
             }
             break;
         }
-    } while (true);
+    }
+    while (true);
 }

@@ -27,8 +27,7 @@ def main():
         while plainText == "":
             plainText = get_string("plaintext: ")
 
-
-    print("ciphertext: ", end = "")
+    print("ciphertext: ", end="")
     for i in range(len(plainText)):
 
         key = ord(keyword[k % keyLen].lower()) - 97
@@ -50,6 +49,7 @@ def main():
 
         if len(cipherletter) == len(plainText):
             print(cipherletter)
+
 
 if __name__ == '__main__':
     main()

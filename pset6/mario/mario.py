@@ -6,7 +6,7 @@ while True:
 
     # Make sure the number is more then 0 and less then 24
     if height < 24 and height >= 0:
-        break;
+        break
 
 # Print
 for i in range(height):

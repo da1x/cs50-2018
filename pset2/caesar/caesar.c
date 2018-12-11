@@ -19,7 +19,8 @@ int main(int argc, string argv[])
         {
             //plaintext
             plainText = get_string("plaintext: ");
-        } while (plainText[0] == '\0');
+        }
+        while (plainText[0] == '\0');
     }
     else
     {
