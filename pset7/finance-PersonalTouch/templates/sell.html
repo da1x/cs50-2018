@@ -7,7 +7,7 @@
 {% block main %}
     <form action="{{ url_for('sell') }}" method="post">
         <div class="form-group">
-            <select class="form-control" name="symbol">
+            <select class="form-control" name="quote">
                 <option disabled selected value>Symbol</option>
                 {% for symbol in symbols %}
                 <option value="{{ symbol.symbol }}">{{ symbol.symbol }}</option>

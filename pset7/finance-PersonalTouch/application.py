@@ -17,15 +17,12 @@ app = Flask(__name__)
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 # Ensure responses aren't cached
-
-
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
-
 
 # Custom filter
 app.jinja_env.filters["usd"] = usd
@@ -40,7 +37,7 @@ Session(app)
 db = SQL("sqlite:///finance.db")
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET","POST"])
 @login_required
 def index():
     """Show portfolio of stocks"""
@@ -61,8 +58,7 @@ def index():
         total = shares * quote["price"]
         totalCash += total
         # Update stock price and total cash in database by usering user ID and symbol
-        db.execute("UPDATE portfolio SET price=:price, total=:total WHERE id=:id AND symbol=:symbol",
-                   price=usd(quote["price"]), total=usd(total), id=session["user_id"], symbol=symbol)
+        db.execute("UPDATE portfolio SET price=:price, total=:total WHERE id=:id AND symbol=:symbol", price=quote["price"] , total=total , id=session["user_id"], symbol=symbol)
 
     # Get users cash amount. (Not stock shares)
     cashInHand = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
@@ -73,8 +69,21 @@ def index():
     # print profilo in index page
     updatedPortfolio = db.execute("SELECT * FROM portfolio WHERE id=:id", id=session["user_id"])
 
-    return render_template("index.html", stocks=updatedPortfolio, cash=usd(cashInHand[0]["cash"]), total=usd(totalCash))
+    # Get all exchange symbols
+    exchange_symbols = GetAllExchangeSymbols();
 
+    if request.method == 'POST':
+        session['selected_curr'] = request.form.get('currency')
+
+    try:
+        print(session['selected_curr'])
+    except:
+        session['selected_curr'] = "USD"
+        print(session['selected_curr'])
+
+    newCurr = exchange()
+
+    return render_template("index.html", stocks=updatedPortfolio, cash=cashInHand[0]["cash"], total=totalCash, exchange_symbols=exchange_symbols, selected_curr=session['selected_curr'], newCurr=newCurr)
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
@@ -85,46 +94,43 @@ def buy():
         return render_template("buy.html")
     else:
         # check proper number of shares
-        if not request.form.get("symbol"):
-            return apology("must provide symbol", 400)
+        if not request.form.get("quote"):
+            return apology("must provide symbol")
         else:
-            quote = lookup(request.form.get("symbol"))
+            quote = lookup(request.form.get("quote"))
 
         if not quote:
-            return apology("Symbol Invailded", 400)
+            return apology("Symbol Invailded")
 
         # check the user input shares its a vailded int
         try:
             shares = int(request.form.get("shares"))
             if shares < 0:
-                return apology("share(s) must be positive number", 400)
+                return apology("share(s) must be positive number")
         except:
             return apology("invailed share(s)")
 
         # select users cash from db by using cookie
         userCash = db.execute("SELECT cash FROM users WHERE id = :id", id=session["user_id"])
 
-        # check if enough money to
-        # or float(money[0]["cash"])?
+        #check if enough money to
+        #or float(money[0]["cash"])?
         if not userCash or float(userCash[0]["cash"]) < quote["price"] * shares:
             return apology("Not enough money")
 
         # update history
-        db.execute("INSERT INTO 'transaction' ('symbol', 'shares', 'price', 'id') VALUES(:symbol, :shares, :price, :id)",
-                   symbol=quote["symbol"], shares=shares, price=usd(quote["price"]), id=session["user_id"])
+        db.execute("INSERT INTO 'transaction' ('symbol', 'shares', 'price', 'id') VALUES(:symbol, :shares, :price, :id)", symbol=quote["symbol"], shares=shares, price=quote["price"], id=session["user_id"])
 
         # update user cash
-        db.execute("UPDATE users SET cash = cash - :purchase WHERE id = :id",
-                   purchase=quote["price"] * float(shares), id=session["user_id"])
+        db.execute("UPDATE users SET cash = cash - :purchase WHERE id = :id", purchase=quote["price"] * float(shares), id=session["user_id"])
 
         # select users symbol from db
-        userShares = db.execute("SELECT shares FROM portfolio WHERE id = :id AND symbol=:symbol",
-                                id=session["user_id"], symbol=quote["symbol"])
+        userShares = db.execute("SELECT shares FROM portfolio WHERE id = :id AND symbol=:symbol", id=session["user_id"], symbol=quote["symbol"])
 
         # if the symbol doesnt exist then create a new stock object
         if not userShares:
             db.execute("INSERT INTO portfolio (name, shares, price, total, symbol, id) VALUES(:name, :shares, :price, :total, :symbol, :id)",
-                       name=quote["name"], shares=shares, price=usd(quote["price"]), total=usd(shares * quote["price"]), symbol=quote["symbol"], id=session["user_id"])
+                       name=quote["name"], shares=shares ,price=quote["price"], total=shares * quote["price"], symbol=quote["symbol"], id=session["user_id"])
 
         # Else if symbol exist then add the share
         else:
@@ -140,9 +146,23 @@ def buy():
 @login_required
 def history():
     """Show history of transactions"""
+    if request.method == 'POST':
+        session['selected_curr'] = request.form.get('currency')
+
+        try:
+            print(session['selected_curr'])
+        except:
+            session['selected_curr'] = "USD"
+            print(session['selected_curr'])
+
+    newCurr = exchange()
+
+    # Get all exchange symbols
+    exchange_symbols = GetAllExchangeSymbols()
+
     histories = db.execute("SELECT * FROM 'transaction' WHERE id=:id", id=session["user_id"])
 
-    return render_template("history.html", histories=histories)
+    return render_template("history.html", histories=histories, selected_curr=session['selected_curr'], exchange_symbols=exchange_symbols, newCurr=newCurr)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -200,18 +220,31 @@ def quote():
 
     if request.method == "POST":
 
-        if not request.form.get("symbol"):
+        session['selected_curr'] = request.form.get('currency')
+
+        try:
+            print(session['selected_curr'])
+        except:
+            session['selected_curr'] = "USD"
+            print(session['selected_curr'])
+
+        newCurr = exchange()
+
+        if not request.form.get("quote"):
             return apology("must provide symbol")
         else:
-            quote = lookup(request.form.get("symbol"))
+            quote = lookup(request.form.get("quote"))
 
         if not quote:
             return apology("Symbol Invailded")
         else:
-            return render_template("quoted.html", symbolValues=quote, price=usd(quote["price"]))
+            return render_template("display.html", symbolValues=quote, newCurr=newCurr, selected_curr=session['selected_curr'])
 
     else:
-        return render_template("quote.html")
+        # Get all exchange symbols
+        exchange_symbols = GetAllExchangeSymbols()
+
+        return render_template("quote.html", exchange_symbols=exchange_symbols, selected_curr=session['selected_curr'])
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -223,42 +256,37 @@ def register():
 
         # Ensure username was submitted
         if not request.form.get("username"):
-            return apology("must provide username", 400)
+            return apology("must provide username", 403)
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide password", 400)
+            return apology("must provide password", 403)
 
         # Ensure password was submitted
-        elif request.form.get("confirmation") != request.form.get("password"):
-            return apology("confirmation password doesn't match", 400)
-
-        # check if username exisit, because usernames are UNIQUE field in the db
-        usernameDB = db.execute("SELECT username FROM users WHERE username=:name",
-                                name=request.form.get("username"))
-
-        if usernameDB:
-            return apology("username already exist", 400)
+        elif request.form.get("password-confirm") != request.form.get("password"):
+            return apology("confirmation password doesn't match", 403)
 
         # hash the password
         # Insert username with SQL Queries
-        hash = generate_password_hash(request.form.get("password"))
         result = db.execute("INSERT INTO users (username, hash) VALUES(:username, :hash)",
-                            username=request.form.get("username"),
-                            hash=hash)
+                    username=request.form.get("username"),
+                    hash=generate_password_hash(request.form.get("password")))
+
+
+        # check if username exisit, because usernames are UNIQUE field in the db
+        if not result:
+            return apology("username already exist")
 
         # If register is successfully, log them in auto
         # Remember which user has logged in
         session["user_id"] = result
-
-        # Display a flash message
-        flash("Registered!")
 
         # Redirect user to home page
 
         return redirect(url_for("index"))
     else:
         return render_template("register.html")
+
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -268,10 +296,10 @@ def sell():
 
     if request.method == "POST":
        # check proper number of shares
-        if not request.form.get("symbol"):
+        if not request.form.get("quote"):
             return apology("must provide symbol")
         else:
-            quote = lookup(request.form.get("symbol"))
+            quote = lookup(request.form.get("quote"))
 
         if not quote:
             return apology("Symbol Invailded")
@@ -288,15 +316,14 @@ def sell():
         if sharesToSell <= 0:
             return apology("You have enter an invailded number.")
 
-        userShares = db.execute("SELECT shares FROM portfolio WHERE id=:id AND symbol=:symbol",
-                                id=session["user_id"], symbol=quote["symbol"])
+        userShares = db.execute("SELECT shares FROM portfolio WHERE id=:id AND symbol=:symbol", id=session["user_id"], symbol=quote["symbol"])
 
         if userShares[0]["shares"] < sharesToSell:
             return apology("You have enter an invailded number or you don't have enough shares to sell.")
 
         # update history database about the sells
-        db.execute("INSERT INTO 'transaction' ('symbol', 'shares', 'price', 'id') VALUES(:symbol, :shares, :price, :id)",
-                   symbol=quote["symbol"], shares=-sharesToSell, price=usd(quote["price"]), id=session["user_id"])
+        db.execute("INSERT INTO 'transaction' ('symbol', 'shares', 'price', 'id') VALUES(:symbol, :shares, :price, :id)", symbol=quote["symbol"], shares=-sharesToSell, price=quote["price"], id=session["user_id"])
+
 
         # update user cash
         userCash = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
@@ -314,8 +341,7 @@ def sell():
 
         # otherwise update the counts
         else:
-            db.execute("UPDATE portfolio SET shares=:shares WHERE id=:id AND symbol=:symbol",
-                       shares=totalShares, id=session["user_id"], symbol=quote["symbol"])
+            db.execute("UPDATE portfolio SET shares=:shares WHERE id=:id AND symbol=:symbol", shares=totalShares, id=session["user_id"], symbol=quote["symbol"])
 
             return redirect(url_for("index"))
     else:
@@ -324,6 +350,35 @@ def sell():
 
         return render_template("sell.html", symbols=symbols)
 
+
+
+def exchange():
+
+    # Getting exchange from
+    # https://frankfurter.app/
+    base = "USD"
+    if session['selected_curr'] == None:
+        session['selected_curr'] = "USD"
+    other = session['selected_curr']
+
+    if base != other:
+        res = requests.get("https://frankfurter.app/latest", params={"base": base, "symbols": other})
+        if res.status_code != 200:
+            raise Exception("Error: Exchange not found. Please try again later")
+
+        data = res.json()
+        rate = data["rates"][other]
+    else:
+        rate = 1
+
+    return rate
+
+def GetAllExchangeSymbols():
+    res = requests.get("https://frankfurter.app/currencies")
+    if res.status_code != 200:
+        raise Exception("Error: Connection error. Please try again later.")
+    data = res.json()
+    return data
 
 def errorhandler(e):
     """Handle error"""

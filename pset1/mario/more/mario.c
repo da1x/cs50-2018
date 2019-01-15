@@ -10,7 +10,7 @@ int main(void)
         height = get_int("Height: ");
 
         int numberOfSpace = height - 1;
-        if (height < 24 && height >= 0)
+        if (height < 9 && height > 0)
         {
             for (int j = 0; j < height; j++) //height
             {
@@ -42,6 +42,5 @@ int main(void)
             }
             break;
         }
-    }
-    while (true);
+    } while (true);
 }

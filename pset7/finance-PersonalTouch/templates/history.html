@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+    <form action="{{ url_for('history') }}" method="post">
+        Currency:
+        <select class="form-control" name="currency">
+            <option value="{{ selected_curr }}">{{ selected_curr }}</option>
+            {% for exchange_symbol in exchange_symbols %}
+            {% if exchange_symbol!=selected_curr %}
+            <option value="{{ exchange_symbol }}">{{ exchange_symbol }}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+        .<br>
+        <button class="btn btn-danger" type="submit" value="Submit">Change Currency</button>
+    </form>
+    <table class="table table-striped" style="width: 100%">
+        <tr>
+            <th>Symbol</th>
+            <th>Shares</th>
+            <th>Price({{ selected_curr }})</th>
+            <th>Transacted Date</th>
+        </tr>
+        {% for history in histories %}
+        <tr>
+            <td>{{ history.symbol }}</td>
+            <td>{{ history.shares }}</td>
+            <td>${% set price = history.price | float %}{{ "%.2f"|format(price * newCurr)}}</td>
+            <td>{{ history.transactionDate }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

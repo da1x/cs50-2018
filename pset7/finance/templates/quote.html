@@ -6,18 +6,8 @@
 
 {% block main %}
     <form action="{{ url_for('quote') }}" method="post">
-        Currency:
-        <select class="form-control" name="currency">
-            <option value="{{ selected_curr }}">{{ selected_curr }}</option>
-            {% for exchange_symbol in exchange_symbols %}
-            {% if exchange_symbol!=selected_curr %}
-            <option value="{{ exchange_symbol }}">{{ exchange_symbol }}</option>
-            {% endif %}
-            {% endfor %}
-        </select>
-        <br>
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="quote" placeholder="Symbol" type="text"/>
+            <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text"/>
         </div>
         <button class="btn btn-primary" type="submit">Quote</button>
     </form>
